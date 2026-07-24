@@ -1,0 +1,28 @@
+/*
+ * API_GPIO.h
+ *
+ *  Created on: 23 jul 2026
+ *      Author: Chaile, Mariano Oscar
+ *      Legajo: 57362
+ *      Comisión: 4R1
+ *      Function of driver: Driver que contiene funciones para manejo de puertos GPIO que utiliza funciones de la HAL de STM32 Nucleo F439
+ */
+
+#ifndef API_INC_API_GPIO_H_
+#define API_INC_API_GPIO_H_
+
+typedef struct
+{
+    GPIO_TypeDef *Puerto;
+    uint16_t Pin;
+} Led_t;
+
+void PrenderLed(Led_t led);
+
+void ApagarLed (Led_t led);
+
+uint8_t Invertir_Secuencia (uint8_t secuencia);
+
+void MX_GPIO_Init(void);
+
+#endif /* API_INC_API_GPIO_H_ */
