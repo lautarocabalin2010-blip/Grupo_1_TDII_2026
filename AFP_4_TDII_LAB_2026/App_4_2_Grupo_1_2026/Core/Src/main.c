@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "API_GPIO.h"
+#include "API_delay.h" // ¡Incluimos nuestro driver de retardos reutilizable!
 #include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -59,13 +60,8 @@ UART_HandleTypeDef huart3;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-//static void MX_GPIO_Init(void);
 static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
@@ -94,9 +90,11 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  // Variables para nuestra lógica no bloqueante
-  uint32_t tiempo_inicio = HAL_GetTick();
-  uint32_t tiempo_espera = 200; // 200 ms
+  // 1. Declaramos nuestro objeto retardo modular
+  delay_t retardoSecuencia;
+
+  // 2. Inicializamos el retardo en 200 ms (App 1.2)
+  delayInit(&retardoSecuencia, 200);
 
   uint8_t indice_led = 0;
   uint8_t estado_led = 0; // 0 = Apagado, 1 = Encendido
@@ -107,17 +105,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      // 1. Revisamos el botón TODO EL TIEMPO.
-      // Como no hay HAL_Delay(), responde al instante.
+      // 1. Revisamos el botón a máxima velocidad con tu función de inversión
       secuencia = Invertir_Secuencia(secuencia);
 
-      // 2. Evaluamos el tiempo sin detener el programa
-      if ((HAL_GetTick() - tiempo_inicio) >= tiempo_espera)
+      // 2. Evaluamos si pasaron los 200 ms usando el driver no bloqueante
+      if (delayRead(&retardoSecuencia) == true)
       {
-          // 3. Reiniciamos el cronómetro inmediatamente
-          tiempo_inicio = HAL_GetTick();
-
-          // 4. Lógica de estados para el encendido y apagado
+          // 3. Lógica de estados para el encendido y apagado
           if (estado_led == 0)
           {
               PrenderLed(Leds[indice_led]);
@@ -128,8 +122,8 @@ int main(void)
               ApagarLed(Leds[indice_led]);
               estado_led = 0;
 
-              // 5. Calculamos el próximo LED dependiendo de la secuencia
-              if (secuencia == 1) // Secuencia hacia adelante
+              // 4. Calculamos el próximo LED dependiendo de la secuencia (hacia adelante o atrás)
+              if (secuencia == 1) // Secuencia normal (App 1.1)
               {
                   indice_led++;
                   if (indice_led >= Cantidad_Led)
@@ -137,11 +131,11 @@ int main(void)
                       indice_led = 0;
                   }
               }
-              else // Secuencia invertida (hacia atrás)
+              else // Secuencia invertida
               {
                   if (indice_led == 0)
                   {
-                      indice_led = Cantidad_Led - 1; // Vuelve al último LED
+                      indice_led = Cantidad_Led - 1;
                   }
                   else
                   {
@@ -163,14 +157,9 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** Configure the main internal regulator output voltage
-  */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -184,8 +173,6 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -199,23 +186,9 @@ void SystemClock_Config(void)
   }
 }
 
-/**
-  * @brief ETH Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_ETH_Init(void)
 {
-
-  /* USER CODE BEGIN ETH_Init 0 */
-
-  /* USER CODE END ETH_Init 0 */
-
    static uint8_t MACAddr[6];
-
-  /* USER CODE BEGIN ETH_Init 1 */
-
-  /* USER CODE END ETH_Init 1 */
   heth.Instance = ETH;
   MACAddr[0] = 0x00;
   MACAddr[1] = 0x80;
@@ -229,10 +202,6 @@ static void MX_ETH_Init(void)
   heth.Init.RxDesc = DMARxDscrTab;
   heth.Init.RxBuffLen = 1524;
 
-  /* USER CODE BEGIN MACADDRESS */
-
-  /* USER CODE END MACADDRESS */
-
   if (HAL_ETH_Init(&heth) != HAL_OK)
   {
     Error_Handler();
@@ -242,27 +211,10 @@ static void MX_ETH_Init(void)
   TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
   TxConfig.ChecksumCtrl = ETH_CHECKSUM_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
   TxConfig.CRCPadCtrl = ETH_CRC_PAD_INSERT;
-  /* USER CODE BEGIN ETH_Init 2 */
-
-  /* USER CODE END ETH_Init 2 */
-
 }
 
-/**
-  * @brief USART3 Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_USART3_UART_Init(void)
 {
-
-  /* USER CODE BEGIN USART3_Init 0 */
-
-  /* USER CODE END USART3_Init 0 */
-
-  /* USER CODE BEGIN USART3_Init 1 */
-
-  /* USER CODE END USART3_Init 1 */
   huart3.Instance = USART3;
   huart3.Init.BaudRate = 115200;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
@@ -275,27 +227,10 @@ static void MX_USART3_UART_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART3_Init 2 */
-
-  /* USER CODE END USART3_Init 2 */
-
 }
 
-/**
-  * @brief USB_OTG_FS Initialization Function
-  * @param None
-  * @retval None
-  */
 static void MX_USB_OTG_FS_PCD_Init(void)
 {
-
-  /* USER CODE BEGIN USB_OTG_FS_Init 0 */
-
-  /* USER CODE END USB_OTG_FS_Init 0 */
-
-  /* USER CODE BEGIN USB_OTG_FS_Init 1 */
-
-  /* USER CODE END USB_OTG_FS_Init 1 */
   hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
   hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
   hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
@@ -310,44 +245,18 @@ static void MX_USB_OTG_FS_PCD_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USB_OTG_FS_Init 2 */
-
-  /* USER CODE END USB_OTG_FS_Init 2 */
-
 }
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
 
 void Error_Handler(void)
 {
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
   }
-  /* USER CODE END Error_Handler_Debug */
 }
+
 #ifdef USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

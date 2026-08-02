@@ -2,4 +2,3 @@
 ../Drivers/API/Src/API_GPIO.c:32:6:ApagarLed	16	static
 ../Drivers/API/Src/API_GPIO.c:42:9:Cambiar_Secuencia	24	static
 ../Drivers/API/Src/API_GPIO.c:70:6:MX_GPIO_Init	56	static
-../Drivers/API/Src/API_GPIO.c:130:6:Error_Handler	4	static,ignoring_inline_asm

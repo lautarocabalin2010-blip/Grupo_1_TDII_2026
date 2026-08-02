@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "API_GPIO.h"
+#include "API_delay.h" // ¡Incluimos nuestro driver modular de retardos!
 #include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -60,7 +61,6 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-//static void MX_GPIO_Init(void);
 static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
@@ -91,11 +91,19 @@ int main(void)
   // Variables para saber si la secuencia acaba de cambiar
   uint8_t secuencia_anterior = 1;
 
-  // Cronómetros independientes
-  uint32_t t_seq = HAL_GetTick();  // Cronómetro general (Secuencias 1, 2 y 4)
-  uint32_t t_led1 = HAL_GetTick(); // Cronómetros específicos para Secuencia 3
-  uint32_t t_led2 = HAL_GetTick();
-  uint32_t t_led3 = HAL_GetTick();
+  // Declaramos nuestros objetos retardos utilizando el tipo delay_t de la API
+  delay_t delay_seq1;
+  delay_t delay_seq2;
+  delay_t delay_seq4;
+  delay_t delay_led1, delay_led2, delay_led3;
+
+  // Inicializamos los retardos con los tiempos de cada secuencia
+  delayInit(&delay_seq1, 150);
+  delayInit(&delay_seq2, 300);
+  delayInit(&delay_seq4, 150);
+  delayInit(&delay_led1, 100);
+  delayInit(&delay_led2, 300);
+  delayInit(&delay_led3, 600);
 
   // Variables de estado
   uint8_t indice_led = 0;
@@ -122,19 +130,15 @@ int main(void)
           indice_led = 0;
           e_led1 = 0; e_led2 = 0; e_led3 = 0;
 
-          t_seq = HAL_GetTick();
-          t_led1 = HAL_GetTick(); t_led2 = HAL_GetTick(); t_led3 = HAL_GetTick();
-
           secuencia_anterior = secuencia;
       }
 
-      // --- EJECUCIÓN DE SECUENCIAS ---
+      // --- EJECUCIÓN DE SECUENCIAS UTILIZANDO EL DRIVER API_DELAY ---
       switch (secuencia)
       {
           case 1: // Secuencia 1: 150 ms (Uno por uno)
-              if (HAL_GetTick() - t_seq >= 150)
+              if (delayRead(&delay_seq1) == true)
               {
-                  t_seq = HAL_GetTick();
                   if (estado_general == 0) {
                       PrenderLed(Leds[indice_led]);
                       estado_general = 1;
@@ -148,9 +152,8 @@ int main(void)
               break;
 
           case 2: // Secuencia 2: 300 ms (Todos juntos)
-              if (HAL_GetTick() - t_seq >= 300)
+              if (delayRead(&delay_seq2) == true)
               {
-                  t_seq = HAL_GetTick();
                   if (estado_general == 0) {
                       for (int i = 0; i < Cantidad_Led; i++) PrenderLed(Leds[i]);
                       estado_general = 1;
@@ -163,29 +166,25 @@ int main(void)
 
           case 3: // Secuencia 3: Tiempos independientes (100ms, 300ms, 600ms)
               // Cronómetro del LED 1
-              if (HAL_GetTick() - t_led1 >= 100) {
-                  t_led1 = HAL_GetTick();
+              if (delayRead(&delay_led1) == true) {
                   if (e_led1 == 0) { PrenderLed(Leds[0]); e_led1 = 1; }
                   else { ApagarLed(Leds[0]); e_led1 = 0; }
               }
               // Cronómetro del LED 2
-              if (HAL_GetTick() - t_led2 >= 300) {
-                  t_led2 = HAL_GetTick();
+              if (delayRead(&delay_led2) == true) {
                   if (e_led2 == 0) { PrenderLed(Leds[1]); e_led2 = 1; }
                   else { ApagarLed(Leds[1]); e_led2 = 0; }
               }
               // Cronómetro del LED 3
-              if (HAL_GetTick() - t_led3 >= 600) {
-                  t_led3 = HAL_GetTick();
+              if (delayRead(&delay_led3) == true) {
                   if (e_led3 == 0) { PrenderLed(Leds[2]); e_led3 = 1; }
                   else { ApagarLed(Leds[2]); e_led3 = 0; }
               }
               break;
 
           case 4: // Secuencia 4: 150 ms (Inversos)
-              if (HAL_GetTick() - t_seq >= 150)
+              if (delayRead(&delay_seq4) == true)
               {
-                  t_seq = HAL_GetTick();
                   if (estado_general == 0) {
                       PrenderLed(Leds[0]);
                       ApagarLed(Leds[1]);
@@ -256,16 +255,8 @@ void SystemClock_Config(void)
   */
 static void MX_ETH_Init(void)
 {
-
-  /* USER CODE BEGIN ETH_Init 0 */
-
-  /* USER CODE END ETH_Init 0 */
-
    static uint8_t MACAddr[6];
 
-  /* USER CODE BEGIN ETH_Init 1 */
-
-  /* USER CODE END ETH_Init 1 */
   heth.Instance = ETH;
   MACAddr[0] = 0x00;
   MACAddr[1] = 0x80;
@@ -279,10 +270,6 @@ static void MX_ETH_Init(void)
   heth.Init.RxDesc = DMARxDscrTab;
   heth.Init.RxBuffLen = 1524;
 
-  /* USER CODE BEGIN MACADDRESS */
-
-  /* USER CODE END MACADDRESS */
-
   if (HAL_ETH_Init(&heth) != HAL_OK)
   {
     Error_Handler();
@@ -292,10 +279,6 @@ static void MX_ETH_Init(void)
   TxConfig.Attributes = ETH_TX_PACKETS_FEATURES_CSUM | ETH_TX_PACKETS_FEATURES_CRCPAD;
   TxConfig.ChecksumCtrl = ETH_CHECKSUM_IPHDR_PAYLOAD_INSERT_PHDR_CALC;
   TxConfig.CRCPadCtrl = ETH_CRC_PAD_INSERT;
-  /* USER CODE BEGIN ETH_Init 2 */
-
-  /* USER CODE END ETH_Init 2 */
-
 }
 
 /**
@@ -305,14 +288,6 @@ static void MX_ETH_Init(void)
   */
 static void MX_USART3_UART_Init(void)
 {
-
-  /* USER CODE BEGIN USART3_Init 0 */
-
-  /* USER CODE END USART3_Init 0 */
-
-  /* USER CODE BEGIN USART3_Init 1 */
-
-  /* USER CODE END USART3_Init 1 */
   huart3.Instance = USART3;
   huart3.Init.BaudRate = 115200;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
@@ -325,10 +300,6 @@ static void MX_USART3_UART_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART3_Init 2 */
-
-  /* USER CODE END USART3_Init 2 */
-
 }
 
 /**
@@ -338,14 +309,6 @@ static void MX_USART3_UART_Init(void)
   */
 static void MX_USB_OTG_FS_PCD_Init(void)
 {
-
-  /* USER CODE BEGIN USB_OTG_FS_Init 0 */
-
-  /* USER CODE END USB_OTG_FS_Init 0 */
-
-  /* USER CODE BEGIN USB_OTG_FS_Init 1 */
-
-  /* USER CODE END USB_OTG_FS_Init 1 */
   hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
   hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
   hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
@@ -360,8 +323,18 @@ static void MX_USB_OTG_FS_PCD_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USB_OTG_FS_Init 2 */
-
-  /* USER CODE END USB_OTG_FS_Init 2 */
-
 }
+
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1)
+  {
+  }
+}
+
+#ifdef USE_FULL_ASSERT
+void assert_failed(uint8_t *file, uint32_t line)
+{
+}
+#endif /* USE_FULL_ASSERT */
