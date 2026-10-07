@@ -2,7 +2,6 @@
  * API_debounce.c
  *
  *  Created on: 4 oct 2026
- *      Author: lauta
  */
 
 /*Includes -------------------------------------------------------------------*/
