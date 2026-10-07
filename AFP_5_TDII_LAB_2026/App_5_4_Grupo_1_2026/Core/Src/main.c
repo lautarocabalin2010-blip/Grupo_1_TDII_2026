@@ -37,6 +37,11 @@
 #define LED_ROJO_PIN    GPIO_PIN_7
 #define LED_VERDE_PORT  GPIOB
 #define LED_VERDE_PIN   GPIO_PIN_14
+#define ret_frec1 100
+#define ret_frec2 250
+#define ret_frec3 500
+#define ret_frec4 1000
+#define ret_frec_default 100
 uint8_t secuencia=1;
 
 Led_t Leds[Cantidad_Led] =
@@ -111,19 +116,19 @@ int main(void)
       switch (secuencia)
       {
           case 1:
-              delayWrite(&retardoFrecuencia, 100);
+              delayWrite(&retardoFrecuencia, ret_frec1);
               break;
           case 2:
-              delayWrite(&retardoFrecuencia, 250);
+              delayWrite(&retardoFrecuencia, ret_frec2);
               break;
           case 3:
-              delayWrite(&retardoFrecuencia, 500);
+              delayWrite(&retardoFrecuencia, ret_frec3);
               break;
           case 4:
-              delayWrite(&retardoFrecuencia, 1000);
+              delayWrite(&retardoFrecuencia, ret_frec4);
               break;
           default:
-              delayWrite(&retardoFrecuencia, 100);
+              delayWrite(&retardoFrecuencia, ret_frec_default);
               secuencia = 1;
               break;
       }

@@ -32,6 +32,12 @@
 #define LED_ROJO_PIN    GPIO_PIN_7
 #define LED_VERDE_PORT  GPIOB
 #define LED_VERDE_PIN   GPIO_PIN_14
+#define Tiempo_seq1 150
+#define Tiempo_seq2 300
+#define Tiempo_seq4 150
+#define Tiempo_led1 100
+#define Tiempo_led2 300
+#define Tiempo_led3 600
 uint8_t secuencia=1;
 
 Led_t Leds[Cantidad_Led] =
@@ -104,12 +110,12 @@ int main(void)
   delay_t delay_led1, delay_led2, delay_led3;
 
   // Inicializamos los retardos con los tiempos de cada secuencia
-  delayInit(&delay_seq1, 150);
-  delayInit(&delay_seq2, 300);
-  delayInit(&delay_seq4, 150);
-  delayInit(&delay_led1, 100);
-  delayInit(&delay_led2, 300);
-  delayInit(&delay_led3, 600);
+  delayInit(&delay_seq1, Tiempo_seq1);
+  delayInit(&delay_seq2, Tiempo_seq2);
+  delayInit(&delay_seq4, Tiempo_seq4);
+  delayInit(&delay_led1, Tiempo_led1);
+  delayInit(&delay_led2, Tiempo_led2);
+  delayInit(&delay_led3, Tiempo_led3);
 
   // Variables de estado
   uint8_t indice_led = 0;

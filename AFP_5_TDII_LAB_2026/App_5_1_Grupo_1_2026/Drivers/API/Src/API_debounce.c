@@ -1,10 +1,3 @@
-/*
- * API_debounce.c
- *
- *  Created on: 4 oct 2026
- *      Author: lauta
- */
-
 /*Includes -------------------------------------------------------------------*/
 #include "main.h"
 #include "API_debounce.h"
@@ -13,6 +6,7 @@
 /*Defines --------------------------------------------------------------------*/
 #define DEBOUNCE_DELAY 40
 
+/*Declaracion de variables */
 static debounceState_t actualState;
 static bool_t keyPressed = false;
 static delay_t debounceDelay;
@@ -25,7 +19,7 @@ void debounceFSM_init(void)
 
 void debounceFSM_update(void)
 {
-    // Leemos el estado del botón directamente aquí
+    // Leemos el estado del botón actual (Activo alto en la NUCLEO-F4)
     bool_t buttonRead = (HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin) == GPIO_PIN_SET);
 
     switch (actualState)
@@ -34,7 +28,7 @@ void debounceFSM_update(void)
         if(buttonRead == true)
         {
             actualState = BUTTON_FALLING;
-            delayRead(&debounceDelay);
+            delayRead(&debounceDelay);   // arranca cuenta de 40 ms
         }
         break;
 
@@ -43,6 +37,7 @@ void debounceFSM_update(void)
         {
             if(buttonRead == true)
             {
+                buttonPressed();   // Ejecuta la acción obligatoria (LED1)
                 keyPressed = true;
                 actualState = BUTTON_DOWN;
             }
@@ -57,7 +52,7 @@ void debounceFSM_update(void)
         if(buttonRead == false)
         {
             actualState = BUTTON_RISING;
-            delayRead(&debounceDelay);
+            delayRead(&debounceDelay);   // arranca cuenta de 40 ms
         }
         break;
 
@@ -66,6 +61,8 @@ void debounceFSM_update(void)
         {
             if(buttonRead == false)
             {
+                buttonReleased();  // Ejecuta la acción obligatoria (LED3)
+                keyPressed = false;
                 actualState = BUTTON_UP;
             }
             else
@@ -88,7 +85,17 @@ bool_t readKey(void)
     if(keyPressed)
     {
         keyPress = true;
-        keyPressed = false; // Reiniciamos la bandera
+        keyPressed = false; // Limpia la bandera
     }
     return keyPress;
+}
+
+void buttonPressed(void)
+{
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0); // Cambia por el pin de tu LED1
+}
+
+void buttonReleased(void)
+{
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7); // Cambia por el pin de tu LED3
 }

@@ -11,9 +11,8 @@
 #ifndef API_INC_API_DEBOUNCE_H_
 #define API_INC_API_DEBOUNCE_H_
 
-#include "API_delay.h" // Para usar bool_t y delay_t
+#include "API_delay.h"
 
-// Definición de los estados de la máquina de estados
 typedef enum {
     BUTTON_UP,
     BUTTON_FALLING,
@@ -21,9 +20,11 @@ typedef enum {
     BUTTON_RISING
 } debounceState_t;
 
-// Prototipos de funciones
 void debounceFSM_init(void);
 void debounceFSM_update(void);
 bool_t readKey(void);
+
+void buttonPressed(void);
+void buttonReleased(void);
 
 #endif /* API_INC_API_DEBOUNCE_H_ */

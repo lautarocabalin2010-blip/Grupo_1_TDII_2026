@@ -37,17 +37,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000902  00000000  00000000  000166c0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  000248d3  00000000  00000000  00016fc2  2**0
+ 17 .debug_macro  000248f7  00000000  00000000  00016fc2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0000e3e8  00000000  00000000  0003b895  2**0
+ 18 .debug_line   0000e3e8  00000000  00000000  0003b8b9  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000dbaae  00000000  00000000  00049c7d  2**0
+ 19 .debug_str    000dbb0e  00000000  00000000  00049ca1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  0012572b  2**0
+ 20 .comment      00000043  00000000  00000000  001257af  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  00002e00  00000000  00000000  00125770  2**2
+ 21 .debug_frame  00002e00  00000000  00000000  001257f4  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 0000009b  00000000  00000000  00128570  2**0
+ 22 .debug_line_str 0000009b  00000000  00000000  001285f4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -398,32 +398,32 @@ int main(void)
   delay_t delay_led1, delay_led2, delay_led3;
 
   // Inicializamos los retardos con los tiempos de cada secuencia
-  delayInit(&delay_seq1, 150);
+  delayInit(&delay_seq1, Tiempo_seq1);
  8000536:	f107 0340 	add.w	r3, r7, #64	@ 0x40
  800053a:	2196      	movs	r1, #150	@ 0x96
  800053c:	4618      	mov	r0, r3
  800053e:	f000 fdf5 	bl	800112c <delayInit>
-  delayInit(&delay_seq2, 300);
+  delayInit(&delay_seq2, Tiempo_seq2);
  8000542:	f107 0334 	add.w	r3, r7, #52	@ 0x34
  8000546:	f44f 7196 	mov.w	r1, #300	@ 0x12c
  800054a:	4618      	mov	r0, r3
  800054c:	f000 fdee 	bl	800112c <delayInit>
-  delayInit(&delay_seq4, 150);
+  delayInit(&delay_seq4, Tiempo_seq4);
  8000550:	f107 0328 	add.w	r3, r7, #40	@ 0x28
  8000554:	2196      	movs	r1, #150	@ 0x96
  8000556:	4618      	mov	r0, r3
  8000558:	f000 fde8 	bl	800112c <delayInit>
-  delayInit(&delay_led1, 100);
+  delayInit(&delay_led1, Tiempo_led1);
  800055c:	f107 031c 	add.w	r3, r7, #28
  8000560:	2164      	movs	r1, #100	@ 0x64
  8000562:	4618      	mov	r0, r3
  8000564:	f000 fde2 	bl	800112c <delayInit>
-  delayInit(&delay_led2, 300);
+  delayInit(&delay_led2, Tiempo_led2);
  8000568:	f107 0310 	add.w	r3, r7, #16
  800056c:	f44f 7196 	mov.w	r1, #300	@ 0x12c
  8000570:	4618      	mov	r0, r3
  8000572:	f000 fddb 	bl	800112c <delayInit>
-  delayInit(&delay_led3, 600);
+  delayInit(&delay_led3, Tiempo_led3);
  8000576:	1d3b      	adds	r3, r7, #4
  8000578:	f44f 7116 	mov.w	r1, #600	@ 0x258
  800057c:	4618      	mov	r0, r3

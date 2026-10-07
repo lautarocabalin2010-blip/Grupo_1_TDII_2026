@@ -14,7 +14,7 @@
 /* USER CODE BEGIN Includes */
 #include "API_GPIO.h"
 #include "API_delay.h" // Nuestro módulo de retardos
-#include "API_debounce.h"
+#include "API_debounce.h" // Nuestro módulo anti-rebote
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -77,10 +77,11 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  // 1. Declaramos nuestro retardo modular
-  delay_t retardoSecuencia;
+  // 1. Inicializamos la máquina de estados del anti-rebote
+  debounceFSM_init();
 
-  // 2. Inicializamos el retardo en 200 ms (App 1.1)
+  // 2. Declaramos y configuramos nuestro retardo modular de 200 ms
+  delay_t retardoSecuencia;
   delayInit(&retardoSecuencia, 200);
 
   uint8_t indice_led = 0;
@@ -92,7 +93,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      // 3. Evaluamos si pasaron los 200 ms usando delayRead de nuestra API
+      debounceFSM_update();
+
       if (delayRead(&retardoSecuencia) == true)
       {
           if (estado_paso == 0)
@@ -116,6 +118,8 @@ int main(void)
           }
       }
   }
+  /* USER CODE END WHILE */
+  /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 

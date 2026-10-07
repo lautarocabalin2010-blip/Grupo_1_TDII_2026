@@ -2,8 +2,8 @@
  * API_debounce.h
  *
  *  Created on: 4 oct 2026
- *      Author: Chaile, Mariano Oscar
- *      Legajo: 57362
+ *      Author: Ayala Cabalin, Lautaro Leonel
+ *      Legajo: 56018
  *      Comisión: 4R1
  *      Function of driver: Implementación de una máquina de estados para eliminar el rebote mecánico de pulsadores.
  */

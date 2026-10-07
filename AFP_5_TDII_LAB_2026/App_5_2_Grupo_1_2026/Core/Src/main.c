@@ -4,22 +4,12 @@
   * @file           : main.c
   * @brief          : Main program body
   ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2026 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "API_GPIO.h"
-#include "API_delay.h" // ¡Incluimos nuestro driver de retardos reutilizable!
+#include "API_delay.h"
 #include "API_debounce.h"
 #include "string.h"
 
@@ -36,7 +26,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define Cantidad_Led 3
-uint8_t secuencia=1;
+uint8_t secuencia = 1;
 
 Led_t Leds[Cantidad_Led] =
 {
@@ -54,13 +44,11 @@ Led_t Leds[Cantidad_Led] =
 /* Private variables ---------------------------------------------------------*/
 
 ETH_TxPacketConfig TxConfig;
-ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT]; /* Ethernet Rx DMA Descriptors */
-ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
+ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT];
+ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT];
 
 ETH_HandleTypeDef heth;
-
 UART_HandleTypeDef huart3;
-
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,22 +56,10 @@ void SystemClock_Config(void);
 static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
-  /* MCU Configuration--------------------------------------------------------*/
   HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
@@ -92,7 +68,7 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
 
   /* USER CODE BEGIN 2 */
-  debounceFSM_init(); // Inicializamos la máquina de estados del botón
+  debounceFSM_init(); // Inicializamos la MEF del botón
 
   delay_t retardoSecuencia;
   delayInit(&retardoSecuencia, 200);
@@ -102,27 +78,26 @@ int main(void)
   /* USER CODE END 2 */
 
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1)
   {
-      // 1. Actualizamos la máquina de estados del botón todo el tiempo
+      // 1. Actualizamos la máquina de estados del botón constantemente
       debounceFSM_update();
 
-      // 2. Si la tecla fue presionada (detectado de forma segura y sin rebote)
+      // 2. Si la tecla fue presionada de forma segura (sin rebotes)
       if (readKey() == true)
       {
-          // Invertimos la secuencia
+          // Invertimos la secuencia de los LEDs
           if (secuencia == 1)
-        	  {
-        	  	  secuencia = 0;
-        	  }
+          {
+              secuencia = 0;
+          }
           else
-        	  {
-        	  	  secuencia = 1;
-        	  }
+          {
+              secuencia = 1;
+          }
       }
 
-      // 3. Evaluamos si pasaron los 200 ms
+      // 3. Evaluamos si pasaron los 200 ms para mover la secuencia de LEDs
       if (delayRead(&retardoSecuencia) == true)
       {
           if (estado_led == 0)
@@ -147,12 +122,8 @@ int main(void)
               }
           }
       }
-      /* USER CODE END WHILE */
-
-      /* USER CODE BEGIN 3 */
-  } // <-- LLAVE AGREGADA: Cierra el bucle while (1)
-  /* USER CODE END 3 */
-} // <-- LLAVE AGREGADA: Cierra la función int main(void)
+  }
+}
 
 /**
   * @brief System Clock Configuration

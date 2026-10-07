@@ -1,19 +1,18 @@
 /*
- * API_debounce.h
+ * API_GPIO.h
  *
- *  Created on: 4 oct 2026
- *      Author: Chaile, Mariano Oscar
- *      Legajo: 57362
+ *  Created on: 31 jul 2026
+ *      Author: Chehuán, Aaron
+ *      Legajo: 56016
  *      Comisión: 4R1
- *      Function of driver: Implementación de una máquina de estados para eliminar el rebote mecánico de pulsadores.
+ *      Function of driver: Driver que contiene funciones para manejo de puertos GPIO que utiliza funciones de la HAL de STM32 Nucleo F439
  */
 
 #ifndef API_INC_API_DEBOUNCE_H_
 #define API_INC_API_DEBOUNCE_H_
 
-#include "API_delay.h" // Para usar bool_t y delay_t
+#include "API_delay.h"
 
-// Definición de los estados de la máquina de estados
 typedef enum {
     BUTTON_UP,
     BUTTON_FALLING,
@@ -21,9 +20,11 @@ typedef enum {
     BUTTON_RISING
 } debounceState_t;
 
-// Prototipos de funciones
 void debounceFSM_init(void);
 void debounceFSM_update(void);
 bool_t readKey(void);
+
+void buttonPressed(void);
+void buttonReleased(void);
 
 #endif /* API_INC_API_DEBOUNCE_H_ */

@@ -1,10 +1,3 @@
-/*
- * API_debounce.c
- *
- *  Created on: 4 oct 2026
- *      Author: lauta
- */
-
 /*Includes -------------------------------------------------------------------*/
 #include "main.h"
 #include "API_debounce.h"
@@ -25,7 +18,6 @@ void debounceFSM_init(void)
 
 void debounceFSM_update(void)
 {
-    // Leemos el estado del botón directamente aquí
     bool_t buttonRead = (HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin) == GPIO_PIN_SET);
 
     switch (actualState)
@@ -43,6 +35,7 @@ void debounceFSM_update(void)
         {
             if(buttonRead == true)
             {
+                buttonPressed();   // Dispara la acción al presionar
                 keyPressed = true;
                 actualState = BUTTON_DOWN;
             }
@@ -66,6 +59,8 @@ void debounceFSM_update(void)
         {
             if(buttonRead == false)
             {
+                buttonReleased();  // Dispara la acción al soltar
+                keyPressed = false;
                 actualState = BUTTON_UP;
             }
             else
@@ -88,7 +83,17 @@ bool_t readKey(void)
     if(keyPressed)
     {
         keyPress = true;
-        keyPressed = false; // Reiniciamos la bandera
+        keyPressed = false;
     }
     return keyPress;
+}
+
+void buttonPressed(void)
+{
+    HAL_GPIO_TogglePin(GPIOB, LED_VERDE_Pin); // Toggle LED1 al presionar
+}
+
+void buttonReleased(void)
+{
+    HAL_GPIO_TogglePin(GPIOB, LED_ROJO_Pin);  // Toggle LED3 al soltar
 }
